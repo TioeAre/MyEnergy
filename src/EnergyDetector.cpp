@@ -69,6 +69,10 @@ void Energy::detector(const cv::Mat &frame) {
                   << whole_center[3] << std::endl;
         std::cout << "change frequency: " << change_frequency << std::endl;
         std::cout << "*********************************************" << std::endl;
+        for(int i=0;i<4;i++){
+            cv::putText(frame, std::to_string(i+1), cv::Point(armor[i].x,armor[i].y), cv::FONT_HERSHEY_SIMPLEX, 0.45,
+                        cv::Scalar(0, 255, 0), 1, cv::LINE_AA);
+        }
     }
 
     cv::imshow("test", final);
@@ -162,8 +166,8 @@ void restore_Rect(cv::Point2f pts[4], cv::Point2f points[4]) {
     if (lengths[0].first == 1) {
         points[0] = pts[0];
         points[1] = pts[lengths[0].first];
-        points[2] = pts[lengths[1].first];
-        points[3] = pts[lengths[2].first];
+        points[2] = pts[lengths[2].first];
+        points[3] = pts[lengths[1].first];
     } else {
         points[0] = pts[lengths[0].first];
         points[1] = pts[0];

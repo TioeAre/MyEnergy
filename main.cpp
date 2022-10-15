@@ -8,7 +8,7 @@ int fps = 0;
 
 int main() {
     cv::VideoCapture cap;
-    cap.open("/home/tioeare/project/MyEnergy/media/red_low.mp4");
+    cap.open("/home/tioeare/project/MyEnergy/media/fans.mp4");
     cv::Mat frame;
     Energy example;
     while (cap.isOpened()) {

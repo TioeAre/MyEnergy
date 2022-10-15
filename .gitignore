@@ -1,5 +1,7 @@
 /.idea/
 /cmake-build-debug/
+/media/red_high.mp4
+/media/red_low.mp4
 ### C++ template
 # Prerequisites
 *.d
