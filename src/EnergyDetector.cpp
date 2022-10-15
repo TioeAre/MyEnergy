@@ -142,7 +142,7 @@ void Energy::judgeCenStricken(std::vector<std::vector<cv::Point>> &centerContour
         cv::Point2f centerPoint = unJudge.center;
         float angle = abs(atan2(centerPoint.y - armorCenter.y, centerPoint.x - armorCenter.x));
         //判断疑似中心点与待打击装甲板的角度值，长度比和面积比来确定中心点
-        if ((abs(angle - unStricken.angle) < 5 || abs(90 - angle - unStricken.angle) < 5) &&
+        if ((abs(angle - unStricken.angle) < 40 || abs(90 - angle - unStricken.angle) < 40) &&
             0.1 < calRectArea(unJudge) / calRectArea(unStricken) && calRectArea(unJudge) / calRectArea(unStricken) < 0.5 &&
             dis(unJudge.center, unStricken.center) / dis(armor[0], armor[1]) < 8) {
             energyCenter = unJudge;
