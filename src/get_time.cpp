@@ -21,10 +21,6 @@ int get_time_() {
     time_point_now = system_clock::now();
     since1970_to_now_last = time_point_now.time_since_epoch();
     fps = (int) (1 / delta);
-    if (!IF_DEBUG) {
-//            std::cout << "total =\t" << delta_ << " s" << std::endl << std::endl;
-        cout << "fps =\t " << fps << endl;
-    }
     return fps;
 }
 
