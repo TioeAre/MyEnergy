@@ -147,9 +147,9 @@ void EnergyDetector::judgeCenStricken(std::vector<std::vector<cv::Point>> &cente
         unJudge = cv::minAreaRect(centerContour);
         cv::Point2f armorCenter = unStricken.center;
         cv::Point2f centerPoint = unJudge.center;
-        float angle = abs(atan2(centerPoint.y - armorCenter.y, centerPoint.x - armorCenter.x));
+        float angle = abs(atan2(centerPoint.y - armorCenter.y, centerPoint.x - armorCenter.x)) * 180 / M_PI;
         //判断疑似中心点与待打击装甲板的角度值，长度比和面积比来确定中心点
-        if ((abs(angle - unStricken.angle) < 40 || abs(90 - angle - unStricken.angle) < 40) &&
+        if ((abs(angle - unStricken.angle) < 20 || abs(90 - angle + unStricken.angle) < 20) &&
             0.1 < calRectArea(unJudge) / calRectArea(unStricken) &&
             calRectArea(unJudge) / calRectArea(unStricken) < 0.5 &&
             dis(unJudge.center, unStricken.center) / dis(armor[0], armor[1]) < 8) {
