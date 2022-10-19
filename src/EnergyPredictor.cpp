@@ -10,7 +10,6 @@ extern int fps;
 void EnergyPre::predict(float &yaw, float &pitch, cv::Point3f armor_pos) {
 //    yawNow = yaw - firstYaw;
 //    pitchNow = pitch - firstPitch;    //TODO:改成电控传来的当前yaw、pitch
-
 //存数据
     armorWorldPoint = toWorldPoints(armor_pos);
     if (armorPoints.size() != size) {
@@ -24,10 +23,11 @@ void EnergyPre::predict(float &yaw, float &pitch, cv::Point3f armor_pos) {
     times.push_back((float) (current_time() - first_time));
     centerPoint = fixCenter();
 
-    if (speeds.size() != size - 1)
-        for (int i = 1; i < size; i++) {
-            speeds.push_back(calSpeed(i));
-        }
+    if (speeds.size() != size - gap)
+        if (armorPoints.size() > gap)
+            for (int i = gap; i < size; i++) {
+                speeds.push_back(calSpeed(i));
+            }
     speeds.pop_front();
     speeds.push_back(calSpeed(size - 1));
 //拟合参数
@@ -37,7 +37,7 @@ void EnergyPre::predict(float &yaw, float &pitch, cv::Point3f armor_pos) {
                           armorPoints[armorPoints.size() - 1].z - centerPoint.z};
 //预测
     prediction = 0.5;
-    float theta = (abc[0] * sin(abc[1] * (times[times.size() - 1] + prediction/2)) + abc[2]) * prediction;
+    float theta = (abc[0] * sin(abc[1] * (times[times.size() - 1] + prediction / 2)) + abc[2]) * prediction;
     //TODO:更改为实际需要的预测量
     Eigen::Matrix3f R;
     R << cos(theta) + pow(normVec(0), 2) * (1 - cos(theta)),
@@ -67,34 +67,20 @@ void EnergyPre::predict(float &yaw, float &pitch, cv::Point3f armor_pos) {
 }
 
 cv::Point3f EnergyPre::toWorldPoints(cv::Point3f armor) {
-    Eigen::Matrix3f Ryaw, Rpitch, Rroll, R;
-    Ryaw << cos(yawNow), 0, sin(yawNow),
-            0, 1, 0,
-            -sin(yawNow), 0, cos(yawNow);
-    Rpitch << 1, 0, 0,
+    Eigen::Matrix3f R;
+    R << cos(yawNow) + sin(yawNow), sin(yawNow) * sin(pitchNow), sin(yawNow) * cos(pitchNow),
             0, cos(pitchNow), -sin(pitchNow),
-            0, sin(pitchNow), cos(pitchNow);
-    Rroll << cos(0), -sin(0), 0,
-            sin(0), cos(0), 0,
-            0, 0, 1;
-    R = Ryaw * Rpitch * Rroll;
+            -sin(yawNow), cos(yawNow) * sin(pitchNow), cos(yawNow) * cos(pitchNow);
     Eigen::Vector3f pre = {armor.x, armor.y, armor.z};
     Eigen::Vector3f after = R.inverse() * pre;
     return cv::Point3f{after(0), after(1), after(2)};
 }
 
 cv::Point3f EnergyPre::toWorldPoints(Eigen::Vector3f armor) {
-    Eigen::Matrix3f Ryaw, Rpitch, Rroll, R;
-    Ryaw << cos(yawNow), 0, sin(yawNow),
-            0, 1, 0,
-            -sin(yawNow), 0, cos(yawNow);
-    Rpitch << 1, 0, 0,
+    Eigen::Matrix3f R;
+    R << cos(yawNow) + sin(yawNow), sin(yawNow) * sin(pitchNow), sin(yawNow) * cos(pitchNow),
             0, cos(pitchNow), -sin(pitchNow),
-            0, sin(pitchNow), cos(pitchNow);
-    Rroll << cos(0), -sin(0), 0,
-            sin(0), cos(0), 0,
-            0, 0, 1;
-    R = Ryaw * Rpitch * Rroll;
+            -sin(yawNow), cos(yawNow) * sin(pitchNow), cos(yawNow) * cos(pitchNow);
     Eigen::Vector3f after = R * armor;
     return cv::Point3f{after(0), after(1), after(2)};
 }
@@ -126,11 +112,11 @@ cv::Point3f EnergyPre::fixCenter() {
 }
 
 float EnergyPre::calSpeed(int i) {
-    Eigen::Vector3f pre = {armorPoints[i - 1].x, armorPoints[i - 1].y, armorPoints[i - 1].z};
+    Eigen::Vector3f pre = {armorPoints[i - gap].x, armorPoints[i - gap].y, armorPoints[i - gap].z};
     Eigen::Vector3f now = {armorPoints[i].x, armorPoints[i].y, armorPoints[i].z};
-    float speed = (calAngle(pre, now) / (times[i] - times[i - 1]));
-    if (speed > 3) return speed = 3;
-    else if (speed < -3) return speed = -3;
+    float speed = (calAngle(pre, now) / (times[i] - times[i - gap]));
+    if (speed > 2.5) return speed = 2.5;
+    else if (speed < -2.5) return speed = -2.5;
     else
         return speed;
 }
@@ -148,8 +134,11 @@ float EnergyPre::calAngle(Eigen::Vector3f point1, Eigen::Vector3f point2) {
 }
 
 void EnergyPre::solve() {
+    abc[0] = 0.785;
+    abc[1] = 1.884;
+    abc[2] = 1.305;
     ceres::Problem problem;
-    for (int i = 0; i < size - 1; i++) {
+    for (int i = 0; i < speeds.size() - 1; i++) {
         problem.AddResidualBlock(new ceres::AutoDiffCostFunction<CURVE_FITTING_COST, 1, 3>(
                 new CURVE_FITTING_COST((double) times[i], (double) speeds[i])), NULL, abc
         );

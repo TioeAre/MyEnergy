@@ -15,6 +15,7 @@ int main() {
     cap.open("/home/tioeare/project/MyEnergy/media/fans.mp4");
     cv::Mat frame;
     EnergyDetector example;
+    EnergyPre pre;
     angle_solve ang;
     bool once = true;
     first_time = current_time();
@@ -34,41 +35,32 @@ int main() {
                                           {example.armor[3].x, example.armor[3].y}};
         cv::Point3f position;
         ang.predict_yaw_pitch(armor, position);
-        position.x = position.x / 1000;
-        position.y = position.y / 1000;
-        position.z = position.z / 1000;
-#ifndef IF
-        static EnergyPre pre(ang.tr_yaw, ang.tr_pitch);
-#endif
-#define IF
+        position.x = position.x / 1000; position.y = position.y / 1000; position.z = position.z / 1000;
+
+        if(once){ pre.setFirst(ang.tr_yaw, ang.tr_pitch); once = false;}
 
         //绘图
-        before_yaw.push_back(ang.tr_yaw);
-        before_pitch.push_back(ang.tr_pitch);
-        int y = 500;
-        int x = 1000;
-        cv::Mat yaw(y, x, CV_8UC3, cv::Scalar(255, 255, 255));
-        cv::Mat pitch(y, x, CV_8UC3, cv::Scalar(255, 255, 255));
+        before_yaw.push_back(ang.tr_yaw); before_pitch.push_back(ang.tr_pitch);
+        int y = 500; int x = 1000;
+        cv::Mat yaw(y, x, CV_8UC3, cv::Scalar(255, 255, 255)); cv::Mat pitch(y, x, CV_8UC3, cv::Scalar(255, 255, 255));
         ///预测
         if (example.ifChange)
             pre.setZero();
-        pre.predict(ang.tr_yaw, ang.tr_pitch, position);
-
+        else
+            pre.predict(ang.tr_yaw, ang.tr_pitch, position);
         //绘图
         after_yaw.push_back(ang.tr_yaw);
         after_pitch.push_back(ang.tr_pitch);
         if (before_yaw.size() > 100) {
-            before_yaw.pop_front(); //before_yaw.resize(100);
-            before_pitch.pop_front(); //before_pitch.resize(100);
-            after_yaw.pop_front(); //after_yaw.resize(100);
-            after_pitch.pop_front(); //after_pitch.resize(100);
+            before_yaw.pop_front(); before_pitch.pop_front();
+            after_yaw.pop_front(); after_pitch.pop_front();
         }
         if (!before_pitch.empty())
             for (int i = 0; i < 99; i++) {
-                cv::circle(yaw, cv::Point(i * 10, y / 2 + before_yaw[i] * 6), 3, cv::Scalar(0, 0, 255), -1, 1);
-                cv::circle(yaw, cv::Point(i * 10, y / 2 + after_yaw[i] * 6), 3, cv::Scalar(0, 255, 0), -1, 1);
-                cv::circle(pitch, cv::Point(i * 10, y / 2 + before_pitch[i] * 6), 3, cv::Scalar(0, 0, 255), -1, 1);
-                cv::circle(pitch, cv::Point(i * 10, y / 2 + after_pitch[i] * 6), 3, cv::Scalar(0, 255, 0), -1, 1);
+                cv::circle(yaw, cv::Point(i * 10, y / 2 + before_yaw[i] * 8), 3, cv::Scalar(0, 0, 255), -1, 1);
+                cv::circle(yaw, cv::Point(i * 10, y / 2 + after_yaw[i] * 8), 3, cv::Scalar(0, 255, 0), -1, 1);
+                cv::circle(pitch, cv::Point(i * 10, y / 2 + before_pitch[i] * 8), 3, cv::Scalar(0, 0, 255), -1, 1);
+                cv::circle(pitch, cv::Point(i * 10, y / 2 + after_pitch[i] * 8), 3, cv::Scalar(0, 255, 0), -1, 1);
             }
         cv::imshow("yaw", yaw);
         cv::imshow("pitch", pitch);

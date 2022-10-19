@@ -28,10 +28,12 @@ public:
      * @brief 切换装甲板时清零之前的存储
      */
     void setZero() {armorPoints.resize(0); times.resize(0); speeds.resize(0);}
-    EnergyPre(float yaw, float pitch) : firstYaw(yaw), firstPitch(pitch) {};
+    void setFirst(float yaw, float pitch){firstYaw = yaw; firstPitch = pitch;}
+    EnergyPre(){};
 private:
-    int size = 20;
-    const float firstYaw, firstPitch;   //第一次识别到能量机关时云台的yaw和pitch
+    int size = 30;
+    int gap = 1;
+    float firstYaw, firstPitch;   //第一次识别到能量机关时云台的yaw和pitch
     float yawNow = 0;
     float pitchNow = 0; //当前的云台相对于第一次识别到能量机关时的yaw和pitch值
     float prediction = 1 / (float) fps; //TODO:调整

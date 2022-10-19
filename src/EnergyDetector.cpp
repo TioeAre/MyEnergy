@@ -65,7 +65,7 @@ void EnergyDetector::detector(const cv::Mat &frame) {
     cv::Point2f armor_center;
     armor_center.x = 0.5 * (armor[0].x + armor[2].x);
     armor_center.y = 0.5 * (armor[0].y + armor[2].y);
-    if (dis(armor_center, last_armor_center) > 3.5 * dis(armor[0], armor[3])) ifChange = true;    //TODO:调参
+    if (dis(armor_center, last_armor_center) > dis(armor[0], armor[3])) ifChange = true;    //TODO:调参
     //绘图
     if (IF_DEBUG) {
         drawRect(energyCenter, origin, cv::Scalar(255, 255, 0));
