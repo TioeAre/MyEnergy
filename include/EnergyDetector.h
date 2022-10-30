@@ -29,8 +29,8 @@ private:
     cv::Mat origin;
     int thred = 80; //二值化阈值
     int mediaB = 3; //中值滤波窗口
-    float openEle = 1.5;   //开运算尺寸
-    float closeEle = 3; //闭运算尺寸
+    int openEle = 1;   //开运算尺寸
+    int closeEle = 3; //闭运算尺寸
     std::vector<std::vector<cv::Point>> allContours;   //所有轮廓
     std::vector<std::vector<cv::Point>> unContours;    //未打击的所有疑似轮廓
     std::vector<std::vector<std::vector<cv::Point>>> alrContours;   //已打击的所有疑似轮廓
@@ -39,9 +39,9 @@ private:
 
     cv::RotatedRect energyCenter;   //中心点的旋转矩形
     cv::RotatedRect unStricken;    //未打击装甲版的旋转矩形
-    cv::Point2f lastArmor[4] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
     std::vector<cv::RotatedRect> alrStricken;   //已打击装甲版的旋转矩形
 
+    cv::Point2f lastArmor[4] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}};
     float unStrickenArea;  //未打击装甲版的面积
     int lastAlrStricken = 0;    //上一帧已打击的个数
     int AlrStricken = 0;    //当前帧已打击的个数
